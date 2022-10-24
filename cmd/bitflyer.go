@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"os/exec"
 	"time"
@@ -20,7 +19,7 @@ var bitflyerCmd = &cobra.Command{
 }
 
 var usecase = usecases.BitFlyerUseCase{
-	Client: bitflyer.NewBitFlyer(&http.Client{}, config.NewConfig()),
+	Client: bitflyer.NewBitFlyer(config.NewConfig()),
 }
 var bf = cli.BitFlyerCLI{
 	UseCase: usecase,

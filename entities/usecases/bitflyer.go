@@ -9,35 +9,43 @@ import (
 type AvaiableMarkets = []AvaiableMarket
 
 type AvaiableMarket struct {
-	ProductCode string `json:"product_code"`
-	Alias       string `json:"alias"`
-	MarketType  string `json:"market_type"`
+	ProductCode string
+	Alias       string
+	MarketType  string
 }
 
 type BoardPrice struct {
-	Price float64 `json:"price"`
-	Size  float64 `json:"size"`
+	Price float64
+	Size  float64
 }
 
 type BoardPrices = []BoardPrice
 
 type BoardInformation struct {
-	MidPrice float64     `json:"mid_price"`
-	Bids     BoardPrices `json:"bids"`
-	Asks     BoardPrices `json:"asks"`
+	MidPrice float64
+	Bids     BoardPrices
+	Asks     BoardPrices
 }
 
 type Balance struct {
-	CurrencyCode string  `json:"currency_code"`
-	Amount       float64 `json:"amount"`
-	Available    float64 `json:"available"`
+	CurrencyCode string
+	Amount       float64
+	Available    float64
 }
 
 type Balances = []Balance
 
 type BitFlyerUseCase struct {
-	Client *bitflyer.BitFlyer
+	Client BitFlyerClient
 }
+
+type BitFlyerClient interface {
+	GetAvaiableMarkets() (bitflyer.GetMarketsResponse, error)
+	GetBoard(productCode string) (*bitflyer.BoardResponse, error)
+	GetBalance() (bitflyer.GetBalancesResponse, error)
+}
+
+var _ BitFlyerClient = &bitflyer.BitFlyer{}
 
 func (b *BitFlyerUseCase) ShowAvaiableMarkets() (AvaiableMarkets, error) {
 	result, err := b.Client.GetAvaiableMarkets()

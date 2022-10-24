@@ -15,23 +15,23 @@ import (
 )
 
 type BitFlyer struct {
-	hc               *http.Client
-	endPoint         string
-	apiKey           string
-	apiSecret        string
-	currentTimestamp func() uint64
+	hc        *http.Client
+	endPoint  string
+	apiKey    string
+	apiSecret string
+}
+
+func (b *BitFlyer) currentTimestamp() uint64 {
+	return uint64(time.Now().Unix())
 }
 
 // NewBitFlyer returns a Default BitFlyer client.
-func NewBitFlyer(hc *http.Client, cfg config.Config) *BitFlyer {
+func NewBitFlyer(cfg config.Config) *BitFlyer {
 	return &BitFlyer{
-		hc:        hc,
+		hc:        http.DefaultClient,
 		endPoint:  "https://api.bitflyer.com",
 		apiKey:    cfg.BitFlyerApiKey,
 		apiSecret: cfg.BitFlyerApiSecret,
-		currentTimestamp: func() uint64 {
-			return uint64(time.Now().Unix())
-		},
 	}
 }
 

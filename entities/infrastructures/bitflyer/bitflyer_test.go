@@ -43,7 +43,7 @@ func TestBitFlyer_generateSign(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &BitFlyer{
+			b := BitFlyer{
 				hc:        http.DefaultClient,
 				endPoint:  tt.fields.endPoint,
 				apiSecret: tt.fields.apiSecret,
@@ -116,7 +116,7 @@ func TestBitFlyer_GetAvaiableMarkets(t *testing.T) {
 		)
 
 		t.Run(tt.name, func(t *testing.T) {
-			b := &BitFlyer{
+			b := BitFlyer{
 				hc:        http.DefaultClient,
 				endPoint:  tt.fields.endPoint,
 				apiKey:    tt.fields.apiKey,
@@ -226,7 +226,7 @@ func TestBitFlyer_GetBoard(t *testing.T) {
 		)
 
 		t.Run(tt.name, func(t *testing.T) {
-			b := &BitFlyer{
+			b := BitFlyer{
 				hc:        http.DefaultClient,
 				endPoint:  tt.fields.endPoint,
 				apiKey:    tt.fields.apiKey,
@@ -302,12 +302,11 @@ func TestBitFlyer_GetBalance(t *testing.T) {
 		)
 
 		t.Run(tt.name, func(t *testing.T) {
-			b := &BitFlyer{
-				hc:               http.DefaultClient,
-				endPoint:         tt.fields.endPoint,
-				apiKey:           tt.fields.apiKey,
-				apiSecret:        tt.fields.apiSecret,
-				currentTimestamp: func() uint64 { return 10000 },
+			b := BitFlyer{
+				hc:        http.DefaultClient,
+				endPoint:  tt.fields.endPoint,
+				apiKey:    tt.fields.apiKey,
+				apiSecret: tt.fields.apiSecret,
 			}
 			got, err := b.GetBalance()
 			if (err != nil) != tt.wantErr {
