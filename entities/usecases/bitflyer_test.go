@@ -14,6 +14,7 @@ type mockedBitFlyerClient struct {
 	getMarket  func() (bitflyer.GetMarketsResponse, error)
 	getBoard   func(pc string) (*bitflyer.BoardResponse, error)
 	getBalance func() (bitflyer.GetBalancesResponse, error)
+	sendOrder  func(req bitflyer.SendOrderRequest) (*bitflyer.OrderResponse, error)
 }
 
 func (m mockedBitFlyerClient) GetAvaiableMarkets() (bitflyer.GetMarketsResponse, error) {
@@ -24,6 +25,9 @@ func (m mockedBitFlyerClient) GetBoard(productCode string) (*bitflyer.BoardRespo
 }
 func (m mockedBitFlyerClient) GetBalance() (bitflyer.GetBalancesResponse, error) {
 	return m.getBalance()
+}
+func (m mockedBitFlyerClient) SendOrder(req bitflyer.SendOrderRequest) (*bitflyer.OrderResponse, error) {
+	return m.sendOrder(req)
 }
 
 func TestBitFlyerUseCase_ShowAvaiableMarkets(t *testing.T) {
@@ -221,6 +225,78 @@ func TestBitFlyerUseCase_GetBalance(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("BitFlyerUseCase.GetBalance() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBitFlyerUseCase_CreateOrder(t *testing.T) {
+	type fields struct {
+		Client BitFlyerClient
+	}
+	type args struct {
+		req OrderCreate
+	}
+	tests := []struct {
+		name        string
+		fields      fields
+		args        args
+		want        *OrderInformation
+		wantErr     bool
+		expectedErr error
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				Client: mockedBitFlyerClient{
+					sendOrder: func(req bitflyer.SendOrderRequest) (*bitflyer.OrderResponse, error) {
+						if req.ProductCode == "" ||
+							req.Size == 0 ||
+							req.Price == 0 {
+							return nil, cerror.ErrBadRequest
+						}
+						return &bitflyer.OrderResponse{ChildOrderAcceptanceId: "test_id"}, nil
+					},
+				},
+			},
+			args: args{
+				req: OrderCreate{
+					Price:       10242,
+					Size:        10.5,
+					ProductCode: "TEST_TOKEN",
+				},
+			},
+			want: &OrderInformation{OrderAcceeptanceId: "test_id"},
+		},
+		{
+			name: "error",
+			fields: fields{
+				Client: mockedBitFlyerClient{
+					sendOrder: func(req bitflyer.SendOrderRequest) (*bitflyer.OrderResponse, error) {
+						return nil, cerror.ErrUnknown
+					},
+				},
+			},
+			wantErr:     true,
+			expectedErr: cerror.ErrUnknown,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &BitFlyerUseCase{
+				Client: tt.fields.Client,
+			}
+			got, err := b.CreateOrder(tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("BitFlyerUseCase.CreateOrder() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if (err != nil) && !errors.Is(err, tt.expectedErr) {
+				t.Errorf("BitFlyerUseCase.CreateOrder() error = %v, expectedErr %v", err, tt.expectedErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("BitFlyerUseCase.CreateOrder() = %v, want %v", got, tt.want)
 			}
 		})
 	}

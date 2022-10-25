@@ -323,3 +323,79 @@ func TestBitFlyer_GetBalance(t *testing.T) {
 		})
 	}
 }
+
+func TestBitFlyer_SendOrder(t *testing.T) {
+	type fields struct {
+		endPoint        string
+		apiKey          string
+		apiSecret       string
+		apiResponseCode int
+		apiResponse     string
+	}
+	type args struct {
+		req SendOrderRequest
+	}
+	tests := []struct {
+		name          string
+		fields        fields
+		args          args
+		want          *OrderResponse
+		wantErr       bool
+		expectedError error
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				endPoint:        "http://localhost",
+				apiResponseCode: 200,
+				apiResponse:     `{"child_order_acceptance_id": "test"}`,
+			},
+			args: args{
+				req: SendOrderRequest{
+					ProductCode: "PRD",
+				},
+			},
+			want: &OrderResponse{
+				ChildOrderAcceptanceId: "test",
+			},
+		},
+		{
+			name: "Error",
+			fields: fields{
+				endPoint:        "http://localhost",
+				apiResponseCode: 400,
+				apiResponse:     "Bad request",
+			},
+			wantErr:       true,
+			expectedError: cerror.ErrBadRequest,
+		},
+	}
+	for _, tt := range tests {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		httpmock.RegisterResponder("POST", "http://localhost/v1/me/sendchildorder",
+			httpmock.NewStringResponder(tt.fields.apiResponseCode, tt.fields.apiResponse),
+		)
+		t.Run(tt.name, func(t *testing.T) {
+			b := &BitFlyer{
+				hc:        http.DefaultClient,
+				endPoint:  tt.fields.endPoint,
+				apiKey:    tt.fields.apiKey,
+				apiSecret: tt.fields.apiSecret,
+			}
+			got, err := b.SendOrder(tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("BitFlyer.SendOrder() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if err != nil && !errors.Is(err, tt.expectedError) {
+				t.Errorf("BitFlyer.SendOrder() error = %v, expectedError %v", err, tt.expectedError)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("BitFlyer.SendOrder() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

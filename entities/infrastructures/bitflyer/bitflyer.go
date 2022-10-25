@@ -1,6 +1,7 @@
 package bitflyer
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -35,6 +36,20 @@ func NewBitFlyer(cfg config.Config) *BitFlyer {
 	}
 }
 
+type SendOrderRequest struct {
+	ProductCode    string  `json:"product_code"`
+	ChildOrderType string  `json:"child_order_type"`
+	Side           string  `json:"side"`
+	Price          float64 `json:"price"`
+	Size           float64 `json:"size"`
+	MinuteToExpire int     `json:"minute_to_expire"`
+	TimeInForce    string  `json:"time_in_force"`
+}
+
+type OrderResponse struct {
+	ChildOrderAcceptanceId string `json:"child_order_acceptance_id"`
+}
+
 type MarketResponse struct {
 	ProductCode string `json:"product_code"`
 	MarketType  string `json:"market_type"`
@@ -64,15 +79,28 @@ type BalanceResponse struct {
 
 type GetBalancesResponse = []BalanceResponse
 
-func getRequest[T any](b *BitFlyer, url string, useSecret bool) (*T, error) {
+func request[REQ any, RES any](b *BitFlyer, method string, url string, body *REQ, useSecret bool) (*RES, error) {
 	path := b.endPoint + url
-	req, err := http.NewRequest("GET", path, nil)
+
+	var requestBody []byte
+	var err error
+
+	if body != nil {
+		requestBody, err = json.Marshal(body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshall request body: %w", err)
+		}
+	}
+
+	req, err := http.NewRequest(method, path, bytes.NewBuffer(requestBody))
+
 	if useSecret {
 		timestamp := b.currentTimestamp()
 		req.Header.Add("ACCESS-KEY", b.apiKey)
 		req.Header.Add("ACCESS-TIMESTAMP", fmt.Sprint(timestamp))
-		req.Header.Add("ACCESS-SIGN", b.generateSign("GET", url, "", timestamp))
+		req.Header.Add("ACCESS-SIGN", b.generateSign(method, url, string(requestBody), timestamp))
 	}
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request to %s, %w", url, err)
 	}
@@ -92,6 +120,8 @@ func getRequest[T any](b *BitFlyer, url string, useSecret bool) (*T, error) {
 	if resp.StatusCode >= 400 {
 		rootError := cerror.ErrUnknown
 		switch resp.StatusCode {
+		case 400:
+			rootError = cerror.ErrBadRequest
 		case 401:
 			rootError = cerror.ErrUnAuthorized
 		case 404:
@@ -100,7 +130,7 @@ func getRequest[T any](b *BitFlyer, url string, useSecret bool) (*T, error) {
 		return nil, fmt.Errorf("%w: unexpected response %d. reason = %s", rootError, resp.StatusCode, string(res))
 	}
 
-	var result T
+	var result RES
 
 	err = json.Unmarshal(res, &result)
 	if err != nil {
@@ -108,6 +138,10 @@ func getRequest[T any](b *BitFlyer, url string, useSecret bool) (*T, error) {
 	}
 
 	return &result, nil
+}
+
+func getRequest[T any](b *BitFlyer, url string, useSecret bool) (*T, error) {
+	return request[any, T](b, "GET", url, nil, useSecret)
 }
 
 // generateSign makes a token used to call HTTP Private API.
@@ -155,4 +189,16 @@ func (b *BitFlyer) GetBalance() (GetBalancesResponse, error) {
 	}
 
 	return *response, nil
+}
+
+// SendOrder represents an API call to `POST /v1/me/sendchildorder`.
+//
+// https://lightning.bitflyer.com/docs?lang=ja#%E6%96%B0%E8%A6%8F%E6%B3%A8%E6%96%87%E3%82%92%E5%87%BA%E3%81%99
+func (b *BitFlyer) SendOrder(req SendOrderRequest) (*OrderResponse, error) {
+	response, err := request[SendOrderRequest, OrderResponse](b, "POST", "/v1/me/sendchildorder", &req, true)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }

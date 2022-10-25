@@ -35,6 +35,16 @@ type Balance struct {
 
 type Balances = []Balance
 
+type OrderCreate struct {
+	ProductCode string
+	Price       float64
+	Size        float64
+}
+
+type OrderInformation struct {
+	OrderAcceeptanceId string
+}
+
 type BitFlyerUseCase struct {
 	Client BitFlyerClient
 }
@@ -43,6 +53,7 @@ type BitFlyerClient interface {
 	GetAvaiableMarkets() (bitflyer.GetMarketsResponse, error)
 	GetBoard(productCode string) (*bitflyer.BoardResponse, error)
 	GetBalance() (bitflyer.GetBalancesResponse, error)
+	SendOrder(req bitflyer.SendOrderRequest) (*bitflyer.OrderResponse, error)
 }
 
 var _ BitFlyerClient = &bitflyer.BitFlyer{}
@@ -112,4 +123,20 @@ func (b *BitFlyerUseCase) GetBalance() (Balances, error) {
 	}
 
 	return response, nil
+}
+
+func (b *BitFlyerUseCase) CreateOrder(req OrderCreate) (*OrderInformation, error) {
+	result, err := b.Client.SendOrder(bitflyer.SendOrderRequest{
+		ProductCode: req.ProductCode,
+		Size:        req.Size,
+		Price:       req.Price,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to send order: %w", err)
+	}
+
+	return &OrderInformation{
+		OrderAcceeptanceId: result.ChildOrderAcceptanceId,
+	}, nil
 }
