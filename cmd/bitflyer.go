@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -10,6 +11,7 @@ import (
 	"github.com/sn1w/capital-go/entities/infrastructures/bitflyer"
 	"github.com/sn1w/capital-go/entities/interface/cli"
 	"github.com/sn1w/capital-go/entities/usecases"
+	cerror "github.com/sn1w/capital-go/error"
 	"github.com/spf13/cobra"
 )
 
@@ -72,10 +74,15 @@ var showBoards = &cobra.Command{
 
 var getBalance = &cobra.Command{
 	Use:   "balance",
-	Short: "show current balance",
+	Short: "show current balance (required authorization)",
 	Run: func(cmd *cobra.Command, args []string) {
 		balance, err := bf.GetBalance()
 		if err != nil {
+			if errors.Is(err, cerror.ErrUnAuthorized) {
+				fmt.Println("authorization key is missing or invalid. please check your configuration.")
+				return
+			}
+
 			fmt.Println(err.Error())
 			return
 		}
