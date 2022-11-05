@@ -18,6 +18,7 @@ var rootCmd = &cobra.Command{
 
 // Execute start command.
 func Execute() {
+	cobra.EnableCommandSorting = false
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.SilenceErrors = true
 	deployShellCompletionFileIfNeeded(rootCmd)

@@ -77,9 +77,7 @@ func TestBitFlyerUseCase_ShowAvaiableMarkets(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &BitFlyerUseCase{
-				Client: tt.fields.Client,
-			}
+			b := NewBitFlyerUseCase(tt.fields.Client)
 			got, err := b.ShowAvaiableMarkets()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("BitFlyerUseCase.ShowAvaiableMarkets() error = %v, wantErr %v", err, tt.wantErr)
@@ -145,9 +143,7 @@ func TestBitFlyerUseCase_GetBoard(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &BitFlyerUseCase{
-				Client: tt.fields.Client,
-			}
+			b := NewBitFlyerUseCase(tt.fields.Client)
 			got, err := b.GetBoard(tt.args.productCode)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("BitFlyerUseCase.GetBoard() error = %v, wantErr %v", err, tt.wantErr)
@@ -211,9 +207,7 @@ func TestBitFlyerUseCase_GetBalance(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &BitFlyerUseCase{
-				Client: tt.fields.Client,
-			}
+			b := NewBitFlyerUseCase(tt.fields.Client)
 			got, err := b.GetBalance()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("BitFlyerUseCase.GetBalance() error = %v, wantErr %v", err, tt.wantErr)
@@ -283,9 +277,7 @@ func TestBitFlyerUseCase_CreateOrder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &BitFlyerUseCase{
-				Client: tt.fields.Client,
-			}
+			b := NewBitFlyerUseCase(tt.fields.Client)
 			got, err := b.CreateOrder(tt.args.req)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("BitFlyerUseCase.CreateOrder() error = %v, wantErr %v", err, tt.wantErr)

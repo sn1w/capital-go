@@ -36,14 +36,43 @@ func NewBitFlyer(cfg config.Config) *BitFlyer {
 	}
 }
 
+// ChildOrderType represents Order Type used in SendChildOrder.
+// https://lightning.bitflyer.com/docs?lang=ja&_gl=1*1rx0t7g*_ga*MjI5Nzg4NDM1LjE2NjQ1OTA4MTU.*_ga_3VYMQNCVSM*MTY2NzQ0MzUyMy4xNi4wLjE2Njc0NDM1MjMuNjAuMC4w#%E6%96%B0%E8%A6%8F%E6%B3%A8%E6%96%87%E3%82%92%E5%87%BA%E3%81%99
+type ChildOrderType string
+
+const (
+	ChildOrderTypeLimit  ChildOrderType = "LIMIT"
+	ChildOrderTypeMarket ChildOrderType = "MARKET"
+)
+
+// ChildOrderSide represents Side Types used in SendChildOrder.
+// https://lightning.bitflyer.com/docs?lang=ja&_gl=1*1rx0t7g*_ga*MjI5Nzg4NDM1LjE2NjQ1OTA4MTU.*_ga_3VYMQNCVSM*MTY2NzQ0MzUyMy4xNi4wLjE2Njc0NDM1MjMuNjAuMC4w#%E6%96%B0%E8%A6%8F%E6%B3%A8%E6%96%87%E3%82%92%E5%87%BA%E3%81%99
+type ChildOrderSide string
+
+const (
+	SideBuy  ChildOrderSide = "BUY"
+	SideSell ChildOrderSide = "SELL"
+)
+const MiniuteToExpireDefault = 43200
+
+// TimeInForceType represents TimeInForce param used in SendChildOrder.
+// https://lightning.bitflyer.com/docs?lang=ja&_gl=1*1rx0t7g*_ga*MjI5Nzg4NDM1LjE2NjQ1OTA4MTU.*_ga_3VYMQNCVSM*MTY2NzQ0MzUyMy4xNi4wLjE2Njc0NDM1MjMuNjAuMC4w#%E6%96%B0%E8%A6%8F%E6%B3%A8%E6%96%87%E3%82%92%E5%87%BA%E3%81%99
+type TimeInForceType string
+
+const (
+	TimeInForceGTC TimeInForceType = "GTC"
+	TimeInForceIOC TimeInForceType = "IOC"
+	TimeInForceFOK TimeInForceType = "FOK"
+)
+
 type SendOrderRequest struct {
-	ProductCode    string  `json:"product_code"`
-	ChildOrderType string  `json:"child_order_type"`
-	Side           string  `json:"side"`
-	Price          float64 `json:"price"`
-	Size           float64 `json:"size"`
-	MinuteToExpire int     `json:"minute_to_expire"`
-	TimeInForce    string  `json:"time_in_force"`
+	ProductCode    string          `json:"product_code"`
+	ChildOrderType ChildOrderType  `json:"child_order_type"`
+	Side           ChildOrderSide  `json:"side"`
+	Price          float64         `json:"price"`
+	Size           float64         `json:"size"`
+	MinuteToExpire int             `json:"minute_to_expire"`
+	TimeInForce    TimeInForceType `json:"time_in_force"`
 }
 
 type OrderResponse struct {
@@ -99,6 +128,10 @@ func request[REQ any, RES any](b *BitFlyer, method string, url string, body *REQ
 		req.Header.Add("ACCESS-KEY", b.apiKey)
 		req.Header.Add("ACCESS-TIMESTAMP", fmt.Sprint(timestamp))
 		req.Header.Add("ACCESS-SIGN", b.generateSign(method, url, string(requestBody), timestamp))
+	}
+
+	if method == "POST" {
+		req.Header.Add("Content-Type", "application/json")
 	}
 
 	if err != nil {

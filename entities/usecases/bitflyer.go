@@ -39,6 +39,7 @@ type OrderCreate struct {
 	ProductCode string
 	Price       float64
 	Size        float64
+	Buy         bool
 }
 
 type OrderInformation struct {
@@ -46,7 +47,13 @@ type OrderInformation struct {
 }
 
 type BitFlyerUseCase struct {
-	Client BitFlyerClient
+	client BitFlyerClient
+}
+
+func NewBitFlyerUseCase(client BitFlyerClient) BitFlyerUseCase {
+	return BitFlyerUseCase{
+		client: client,
+	}
 }
 
 type BitFlyerClient interface {
@@ -59,7 +66,7 @@ type BitFlyerClient interface {
 var _ BitFlyerClient = &bitflyer.BitFlyer{}
 
 func (b *BitFlyerUseCase) ShowAvaiableMarkets() (AvaiableMarkets, error) {
-	result, err := b.Client.GetAvaiableMarkets()
+	result, err := b.client.GetAvaiableMarkets()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch markets: %w", err)
 	}
@@ -78,7 +85,7 @@ func (b *BitFlyerUseCase) ShowAvaiableMarkets() (AvaiableMarkets, error) {
 }
 
 func (b *BitFlyerUseCase) GetBoard(productCode string) (BoardInformation, error) {
-	result, err := b.Client.GetBoard(productCode)
+	result, err := b.client.GetBoard(productCode)
 
 	response := BoardInformation{}
 
@@ -106,7 +113,7 @@ func (b *BitFlyerUseCase) GetBoard(productCode string) (BoardInformation, error)
 }
 
 func (b *BitFlyerUseCase) GetBalance() (Balances, error) {
-	result, err := b.Client.GetBalance()
+	result, err := b.client.GetBalance()
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch balance: %w", err)
@@ -126,10 +133,18 @@ func (b *BitFlyerUseCase) GetBalance() (Balances, error) {
 }
 
 func (b *BitFlyerUseCase) CreateOrder(req OrderCreate) (*OrderInformation, error) {
-	result, err := b.Client.SendOrder(bitflyer.SendOrderRequest{
-		ProductCode: req.ProductCode,
-		Size:        req.Size,
-		Price:       req.Price,
+	orderMethod := bitflyer.SideBuy
+	if !req.Buy {
+		orderMethod = bitflyer.SideSell
+	}
+
+	result, err := b.client.SendOrder(bitflyer.SendOrderRequest{
+		ProductCode:    req.ProductCode,
+		Size:           req.Size,
+		Price:          req.Price,
+		Side:           orderMethod,
+		ChildOrderType: bitflyer.ChildOrderTypeLimit,
+		TimeInForce:    bitflyer.TimeInForceGTC,
 	})
 
 	if err != nil {

@@ -7,13 +7,24 @@ import (
 	"github.com/sn1w/capital-go/entities/usecases"
 )
 
-// BitFlyerCLI executes a BitFlyer's UseCase in a form suitable for CLI input/output.
+// BitFlyerCLI executes a BitFlyer's useCase in a form suitable for CLI input/output.
 type BitFlyerCLI struct {
-	UseCase usecases.BitFlyerUseCase
+	useCase usecases.BitFlyerUseCase
+}
+
+func NewBitFlyerCli(usecase usecases.BitFlyerUseCase) BitFlyerCLI {
+	return BitFlyerCLI{useCase: usecase}
+}
+
+type CreateOrderArgument struct {
+	Size        float64
+	Price       float64
+	ProductCode string
+	Buy         bool
 }
 
 func (c *BitFlyerCLI) GetAvaiableMarkets() (string, error) {
-	res, err := c.UseCase.ShowAvaiableMarkets()
+	res, err := c.useCase.ShowAvaiableMarkets()
 
 	if err != nil {
 		return "", err
@@ -29,7 +40,7 @@ func (c *BitFlyerCLI) GetAvaiableMarkets() (string, error) {
 }
 
 func (c *BitFlyerCLI) GetBoard(productCode string) (string, error) {
-	res, err := c.UseCase.GetBoard(productCode)
+	res, err := c.useCase.GetBoard(productCode)
 
 	if err != nil {
 		return "", err
@@ -53,7 +64,7 @@ func (c *BitFlyerCLI) GetBoard(productCode string) (string, error) {
 }
 
 func (c *BitFlyerCLI) GetBalance() (string, error) {
-	res, err := c.UseCase.GetBalance()
+	res, err := c.useCase.GetBalance()
 	if err != nil {
 		return "", err
 	}
@@ -62,6 +73,24 @@ func (c *BitFlyerCLI) GetBalance() (string, error) {
 	for _, v := range res {
 		output += fmt.Sprintf("%s, %f, %f\n", v.CurrencyCode, v.Amount, v.Available)
 	}
+
+	return output, nil
+}
+
+func (c *BitFlyerCLI) CreateOrder(arg CreateOrderArgument) (string, error) {
+	orderReq := usecases.OrderCreate{
+		Size:        arg.Size,
+		Price:       arg.Price,
+		Buy:         arg.Buy,
+		ProductCode: arg.ProductCode,
+	}
+
+	res, err := c.useCase.CreateOrder(orderReq)
+	if err != nil {
+		return "", err
+	}
+
+	output := res.OrderAcceeptanceId
 
 	return output, nil
 }
