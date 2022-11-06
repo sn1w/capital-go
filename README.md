@@ -18,6 +18,16 @@ If you want to use `Authorization Required` actions, you must need to set these 
 | Show Balance | Required |
 | Send Order | Required |
 
+
+### KabuCom
+Before use, You must specified `KABUCOM_API_HOST` variables to fit your environment. 
+`eg) KABUCOM_API_HOST=http://localhost:8080`
+
+| Actions | Authorization |
+| :---- | :--- |
+| Fetch Authorizaton Token | - |
+
+
 ## Build
 ```
 $ make build
