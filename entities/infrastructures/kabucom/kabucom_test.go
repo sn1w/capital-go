@@ -2,7 +2,7 @@ package kabucom
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -55,7 +55,7 @@ func TestKabucomClient_GetToken(t *testing.T) {
 						Header: http.Header{
 							"Content-Type": []string{"application/json"},
 						},
-						Body: ioutil.NopCloser(strings.NewReader(`
+						Body: io.NopCloser(strings.NewReader(`
 						{
 							"ResultCode": 0,
 							"Token": "Hello Token"
@@ -78,7 +78,7 @@ func TestKabucomClient_GetToken(t *testing.T) {
 						Header: http.Header{
 							"Content-Type": []string{"application/json"},
 						},
-						Body: ioutil.NopCloser(strings.NewReader(`
+						Body: io.NopCloser(strings.NewReader(`
 						{
 							"Code": 4001001,
 							"Message": "内部エラー"
@@ -101,7 +101,7 @@ func TestKabucomClient_GetToken(t *testing.T) {
 						Header: http.Header{
 							"Content-Type": []string{"application/json"},
 						},
-						Body: ioutil.NopCloser(strings.NewReader(`
+						Body: io.NopCloser(strings.NewReader(`
 						{
 							"Message": "OK Computer"
 						}

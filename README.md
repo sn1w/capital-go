@@ -25,7 +25,7 @@ Before use, You must specified `KABUCOM_API_HOST` variables to fit your environm
 
 | Actions | Authorization |
 | :---- | :--- |
-| Fetch Authorizaton Token | - |
+| Fetch Authorization Token | - |
 
 
 ## Build

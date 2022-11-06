@@ -37,7 +37,9 @@ var doAuth = func() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&pwd, "password", "p", "", "api password (required)")
-	cmd.MarkFlagRequired("password")
+	if err := cmd.MarkFlagRequired("password"); err != nil {
+		panic(err)
+	}
 
 	return cmd
 }
