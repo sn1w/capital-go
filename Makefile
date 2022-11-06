@@ -33,6 +33,9 @@ vet: ## Start go vet
 fmt: ## Format go source code 
 	$(GO_FORMAT) $(GO_PKGROOT)
 
+generate/kabucom: ## generate kabucom client
+	./scripts/generate-kabucom-client.sh
+
 .DEFAULT_GOAL := help
 help:  
 	@grep -E '^[0-9a-zA-Z_-]+[[:blank:]]*:.*?## .*$$' $(MAKEFILE_LIST) | sort \
