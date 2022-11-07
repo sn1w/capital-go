@@ -14,6 +14,10 @@ type KabucomClient struct {
 	client *autogen.ClientWithResponses
 }
 
+type GetPositionRequest struct {
+	Product string
+}
+
 func NewKabucomClient(cfg config.Config) *KabucomClient {
 	c, err := autogen.NewClientWithResponses(cfg.KabucomAPIHost, autogen.WithHTTPClient(http.DefaultClient))
 	if err != nil {
@@ -44,4 +48,29 @@ func (c *KabucomClient) GetToken(password string) (string, error) {
 	}
 
 	return *res.JSON200.Token, nil
+}
+
+func (c *KabucomClient) GetPosition(req GetPositionRequest) ([]autogen.PositionsSuccess, error) {
+	ctx := context.Background()
+	res, err := c.client.PositionsGetWithResponse(ctx, &autogen.PositionsGetParams{
+		Product: nil,
+		Symbol:  nil,
+		Side:    nil,
+		Addinfo: nil,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("unexpected error %w, reason = %s", cerror.ErrUnknown, err.Error())
+	}
+	defer res.HTTPResponse.Body.Close()
+
+	if res.StatusCode() == 401 {
+		return nil, fmt.Errorf("unexpected error %w, body = %s", cerror.ErrUnAuthorized, res.Body)
+	}
+
+	if res.JSON200 == nil {
+		return nil, fmt.Errorf("unexpected error %w, body = %s", cerror.ErrUnknownResponseFormat, res.Body)
+	}
+
+	return *res.JSON200, nil
 }
