@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/deepmap/oapi-codegen v1.12.2
 	github.com/fatih/color v1.13.0
-	github.com/getkin/kin-openapi v0.107.0
+	github.com/getkin/kin-openapi v0.108.0
 	github.com/google/go-cmp v0.5.9
 	github.com/mattn/go-colorable v0.1.13
 	github.com/spf13/cobra v1.6.1
