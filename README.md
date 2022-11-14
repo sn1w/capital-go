@@ -20,12 +20,13 @@ If you want to use `Authorization Required` actions, you must need to set these 
 
 
 ### KabuCom
-Before use, You must specified `KABUCOM_API_HOST` variables to fit your environment. 
-`eg) KABUCOM_API_HOST=http://localhost:8080`
+Before use, You must specified `KABUCOM_API_HOST` variables to fit your environment.        
+`eg) KABUCOM_API_HOST=http://localhost:8080/kabusapi`
 
 | Actions | Authorization |
 | :---- | :--- |
-| Fetch Authorization Token | - |
+| Fetch Token | - |
+| Show Balance | Required |
 
 
 ## Build

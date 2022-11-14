@@ -15,11 +15,13 @@ type KabucomClient struct {
 }
 
 type GetPositionRequest struct {
+	APIKey  string
 	Product string
 }
 
 func NewKabucomClient(cfg config.Config) *KabucomClient {
-	c, err := autogen.NewClientWithResponses(cfg.KabucomAPIHost, autogen.WithHTTPClient(http.DefaultClient))
+	c, err := autogen.NewClientWithResponses(cfg.KabucomAPIHost,
+		autogen.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		panic(err)
 	}
@@ -57,6 +59,7 @@ func (c *KabucomClient) GetPosition(req GetPositionRequest) ([]autogen.Positions
 		Symbol:  nil,
 		Side:    nil,
 		Addinfo: nil,
+		XAPIKEY: req.APIKey,
 	})
 
 	if err != nil {

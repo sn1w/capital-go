@@ -44,9 +44,37 @@ var doAuth = func() *cobra.Command {
 	return cmd
 }
 
+var getKabucomBalance = func() *cobra.Command {
+	var apiKey string
+
+	cmd := &cobra.Command{
+		Use:   "balance",
+		Short: "Get Balance",
+		Run: func(cmd *cobra.Command, args []string) {
+			output, err := kb.GetBalance(
+				cli.Parameters{
+					APIKey: apiKey,
+				},
+			)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			fmt.Println(output)
+		},
+	}
+
+	cmd.Flags().StringVarP(&apiKey, "token", "t", "", "api token (required)")
+	if err := cmd.MarkFlagRequired("token"); err != nil {
+		panic(err)
+	}
+
+	return cmd
+}
+
 func init() {
 	subCommands := []*cobra.Command{
-		doAuth(),
+		doAuth(), getKabucomBalance(),
 	}
 
 	for _, v := range subCommands {
