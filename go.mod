@@ -3,7 +3,7 @@ module github.com/sn1w/capital-go
 go 1.19
 
 require (
-	github.com/deepmap/oapi-codegen v1.12.2
+	github.com/deepmap/oapi-codegen v1.12.3
 	github.com/fatih/color v1.13.0
 	github.com/getkin/kin-openapi v0.107.0
 	github.com/google/go-cmp v0.5.9
