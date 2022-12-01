@@ -3,7 +3,7 @@ module github.com/sn1w/capital-go
 go 1.19
 
 require (
-	github.com/deepmap/oapi-codegen v1.12.2
+	github.com/deepmap/oapi-codegen v1.12.4
 	github.com/fatih/color v1.13.0
 	github.com/getkin/kin-openapi v0.107.0
 	github.com/google/go-cmp v0.5.9
@@ -29,5 +29,5 @@ require (
 	github.com/jarcoal/httpmock v1.2.0
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/sys v0.2.0 // indirect
 )
